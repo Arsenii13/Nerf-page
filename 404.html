@@ -2,63 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>404 - Nerf Target Practice</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nerf Target Practice</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       background: #111;
       overflow: hidden;
       font-family: Arial, sans-serif;
       user-select: none;
+      height: 100%;
+      width: 100%;
+      touch-action: manipulation;
+    }
+
+    body {
       cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
     }
-     html, body {
-  margin: 0;
-  padding: 0;
-  background: #111;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  user-select: none;
-  height: 100%;
-  width: 100%;
-  touch-action: manipulation;
-}
 
-body {
-  cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
-}
-
-@media (max-width: 768px) {
-  body {
-    cursor: default;
-    font-size: 16px;
-  }
-
-  #hud {
-    font-size: 1em;
-    padding: 8px 16px;
-  }
-
-  .target {
-    width: 70px;
-    height: 70px;
-  }
-
-  #gameOverScreen {
-    font-size: 1.5em;
-    padding: 20px;
-  }
-
-  #notFoundNote {
-    font-size: 0.85em;
-  }
-
-  #startText {
-    font-size: 1.2em;
-    padding: 14px 20px;
-  }
-}
     #hud {
       position: fixed;
       top: 20px;
@@ -111,6 +73,7 @@ body {
       font-size: 2em;
       z-index: 999;
       display: none;
+      text-align: center;
     }
 
     #gameOverScreen button {
@@ -140,74 +103,61 @@ body {
       padding: 20px 30px;
       border-radius: 20px;
       pointer-events: none;
+      text-align: center;
     }
-  #notFoundNote {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  font-size: 0.9em;
-  color: #ccc;
-  background: rgba(0,0,0,0.6);
-  padding: 6px 12px;
-  border-radius: 10px;
-  z-index: 999;
-}
 
-#notFoundNote a {
-  color: #ffa500;
-  text-decoration: underline;
-  margin: 0 4px;
-}
+    #notFoundNote {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-size: 0.9em;
+      color: #ccc;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 12px;
+      border-radius: 10px;
+      z-index: 999;
+    }
 
-#notFoundNote a:hover {
-  color: #ff6600;
-}
-    html, body {
-  margin: 0;
-  padding: 0;
-  background: #111;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  user-select: none;
-  height: 100%;
-  width: 100%;
-  touch-action: manipulation;
-}
+    #notFoundNote a {
+      color: #ffa500;
+      text-decoration: underline;
+      margin: 0 4px;
+    }
 
-body {
-  cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
-}
+    #notFoundNote a:hover {
+      color: #ff6600;
+    }
 
-@media (max-width: 768px) {
-  body {
-    cursor: default;
-    font-size: 16px;
-  }
+    @media (max-width: 768px) {
+      body {
+        cursor: default;
+        font-size: 16px;
+      }
 
-  #hud {
-    font-size: 1em;
-    padding: 8px 16px;
-  }
+      #hud {
+        font-size: 1em;
+        padding: 8px 16px;
+      }
 
-  .target {
-    width: 70px;
-    height: 70px;
-  }
+      .target {
+        width: 70px;
+        height: 70px;
+      }
 
-  #gameOverScreen {
-    font-size: 1.5em;
-    padding: 20px;
-  }
+      #gameOverScreen {
+        font-size: 1.5em;
+        padding: 20px;
+      }
 
-  #notFoundNote {
-    font-size: 0.85em;
-  }
+      #notFoundNote {
+        font-size: 0.85em;
+      }
 
-  #startText {
-    font-size: 1.2em;
-    padding: 14px 20px;
-  }
-  }
+      #startText {
+        font-size: 1.2em;
+        padding: 14px 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -219,7 +169,7 @@ body {
   🔫 Mag: <span id="ammo">18</span>/<span id="maxAmmo">18</span>
 </div>
 
-<div id="startText">🟠 Tap Anywhere to Start</div>
+<div id="startText">🟠 Wrong page?<br>Tap to play.<br><br>Or <a href="index.html">go home</a> / <a href="help.html">ask questions</a></div>
 
 <div id="gameOverScreen">
   <div>🕹️ Game Over</div>
@@ -227,11 +177,7 @@ body {
   <div>Best Score: <span id="finalBest"></span></div>
   <button onclick="startGame()">Play Again</button>
 </div>
-<div id="notFoundNote">
-  ❌ Wrong page – 
-  <a href="index.html">tap here to go home</a> or 
-  <a href="help.html">ask questions</a>
-</div>
+
 <audio id="hitSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_56c6f7b032.mp3" preload="auto"></audio>
 <audio id="reloadSound" src="https://cdn.pixabay.com/download/audio/2022/03/28/audio_aa046e1b88.mp3" preload="auto"></audio>
 
@@ -241,10 +187,8 @@ body {
   const timerEl = document.getElementById("timer");
   const ammoEl = document.getElementById("ammo");
   const maxAmmoEl = document.getElementById("maxAmmo");
-
   const hitSound = document.getElementById("hitSound");
   const reloadSound = document.getElementById("reloadSound");
-
   const gameOverScreen = document.getElementById("gameOverScreen");
   const finalScoreEl = document.getElementById("finalScore");
   const finalBestEl = document.getElementById("finalBest");
@@ -267,13 +211,7 @@ body {
   bestEl.textContent = best;
 
   const targetUrl = "https://www.clipartmax.com/png/full/98-983971_filetarget-svg-target-for-nerf.png";
-const margin = 100;
-const hudHeight = 100;
-const topLimit = hudHeight;
-const bottomLimit = window.innerHeight - margin;
 
-img.style.top = `${Math.random() * (bottomLimit - topLimit) + topLimit}px`;
-img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
   function spawnTarget() {
     if (document.querySelectorAll(".target").length >= 2 || gameOver) return;
 
@@ -281,12 +219,11 @@ img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
     img.src = targetUrl;
     img.className = "target";
 
-    const hudHeight = 100;
-    const topLimit = hudHeight;
-    const bottomLimit = window.innerHeight - 100;
-
+    const margin = 100;
+    const topLimit = 100;
+    const bottomLimit = window.innerHeight - margin;
     img.style.top = `${Math.random() * (bottomLimit - topLimit) + topLimit}px`;
-    img.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+    img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
 
     img.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -296,6 +233,7 @@ img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
       scoreEl.textContent = score;
 
       try { hitSound.currentTime = 0; hitSound.play(); } catch (e) {}
+
       showHitEffect(img);
       img.remove();
       spawnTarget();
@@ -389,10 +327,7 @@ img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
 
       ammo--;
       ammoEl.textContent = ammo;
-
-      if (ammo === 0) {
-        reloadAmmo();
-      }
+      if (ammo === 0) reloadAmmo();
     }
   });
 
