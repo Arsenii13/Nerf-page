@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nerf Target Practice</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
+    }
+
+    #hud {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.2em;
+      z-index: 100;
+    }
+
+    .target {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .hit-effect {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255, 255, 0, 0.5);
+      animation: flash 0.3s ease-out;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    @keyframes flash {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(2); }
+    }
+
+    #gameOverScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      z-index: 999;
+      display: none;
+    }
+
+    #gameOverScreen button {
+      margin-top: 20px;
+      font-size: 1em;
+      padding: 10px 20px;
+      background: #ff4d00;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #gameOverScreen button:hover {
+      background: #ff7700;
+    }
+
+    #startText {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: orange;
+      font-size: 2em;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px 30px;
+      border-radius: 20px;
+      pointer-events: none;
+    }
+  #notFoundNote {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.9em;
+  color: #ccc;
+  background: rgba(0,0,0,0.6);
+  padding: 6px 12px;
+  border-radius: 10px;
+  z-index: 999;
+}
+
+#notFoundNote a {
+  color: #ffa500;
+  text-decoration: underline;
+  margin: 0 4px;
+}
+
+#notFoundNote a:hover {
+  color: #ff6600;
+}
+  </style>
+</head>
+<body>
+
+<div id="hud">
+  🎯 Score: <span id="score">0</span> |
+  🏆 Best: <span id="best">0</span> |
+  ⏱ Time: <span id="timer">30</span>s |
+  🔫 Mag: <span id="ammo">18</span>/<span id="maxAmmo">18</span>
+</div>
+
+<div id="startText">🟠 Tap Anywhere to Start</div>
+
+<div id="gameOverScreen">
+  <div>🕹️ Game Over</div>
+  <div>Your Score: <span id="finalScore"></span></div>
+  <div>Best Score: <span id="finalBest"></span></div>
+  <button onclick="startGame()">Play Again</button>
+</div>
+<div id="notFoundNote">
+  ❌ Wrong page – 
+  <a href="index.html">tap here to go home</a> or 
+  <a href="help.html">ask questions</a>
+</div>
+<audio id="hitSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_56c6f7b032.mp3" preload="auto"></audio>
+<audio id="reloadSound" src="https://cdn.pixabay.com/download/audio/2022/03/28/audio_aa046e1b88.mp3" preload="auto"></audio>
+
+<script>
+  const scoreEl = document.getElementById("score");
+  const bestEl = document.getElementById("best");
+  const timerEl = document.getElementById("timer");
+  const ammoEl = document.getElementById("ammo");
+  const maxAmmoEl = document.getElementById("maxAmmo");
+
+  const hitSound = document.getElementById("hitSound");
+  const reloadSound = document.getElementById("reloadSound");
+
+  const gameOverScreen = document.getElementById("gameOverScreen");
+  const finalScoreEl = document.getElementById("finalScore");
+  const finalBestEl = document.getElementById("finalBest");
+  const startText = document.getElementById("startText");
+
+  let score = 0;
+  let best = 0;
+  let time = 30;
+  let gameInterval;
+  let gameStarted = false;
+  let gameOver = false;
+
+  let ammo = 18;
+  const maxAmmo = 18;
+  let reloading = false;
+
+  maxAmmoEl.textContent = maxAmmo;
+  const storedBest = localStorage.getItem("nerfBestScore");
+  best = storedBest ? +storedBest : 0;
+  bestEl.textContent = best;
+
+  const targetUrl = "https://www.clipartmax.com/png/full/98-983971_filetarget-svg-target-for-nerf.png";
+
+  function spawnTarget() {
+    if (document.querySelectorAll(".target").length >= 2 || gameOver) return;
+
+    const img = document.createElement("img");
+    img.src = targetUrl;
+    img.className = "target";
+
+    const hudHeight = 100;
+    const topLimit = hudHeight;
+    const bottomLimit = window.innerHeight - 100;
+
+    img.style.top = `${Math.random() * (bottomLimit - topLimit) + topLimit}px`;
+    img.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+
+    img.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (gameOver || reloading || ammo <= 0) return;
+
+      score++;
+      scoreEl.textContent = score;
+
+      try { hitSound.currentTime = 0; hitSound.play(); } catch (e) {}
+      showHitEffect(img);
+      img.remove();
+      spawnTarget();
+    });
+
+    document.body.appendChild(img);
+  }
+
+  function showHitEffect(el) {
+    const eff = document.createElement("div");
+    eff.className = "hit-effect";
+    eff.style.top = el.style.top;
+    eff.style.left = el.style.left;
+    document.body.appendChild(eff);
+    setTimeout(() => eff.remove(), 300);
+  }
+
+  function reloadAmmo() {
+    if (reloading) return;
+    reloading = true;
+
+    try { reloadSound.currentTime = 0; reloadSound.play(); } catch (e) {}
+
+    setTimeout(() => {
+      ammo = maxAmmo;
+      ammoEl.textContent = ammo;
+      reloading = false;
+    }, 2000);
+  }
+
+  function startGame() {
+    score = 0;
+    time = 30;
+    gameOver = false;
+    reloading = false;
+    ammo = maxAmmo;
+
+    scoreEl.textContent = score;
+    timerEl.textContent = time;
+    ammoEl.textContent = ammo;
+    bestEl.textContent = best;
+    gameOverScreen.style.display = "none";
+    startText.style.display = "none";
+    document.querySelectorAll(".target").forEach(t => t.remove());
+
+    spawnTarget();
+    spawnTarget();
+
+    if (gameInterval) clearInterval(gameInterval);
+
+    gameInterval = setInterval(() => {
+      time--;
+      timerEl.textContent = time;
+
+      if (time <= 0) {
+        endGame();
+      } else {
+        spawnTarget();
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    if (gameOver) return;
+    gameOver = true;
+    clearInterval(gameInterval);
+    document.querySelectorAll(".target").forEach(t => t.remove());
+
+    if (score > best) {
+      best = score;
+      localStorage.setItem("nerfBestScore", best);
+    }
+
+    finalScoreEl.textContent = score;
+    finalBestEl.textContent = best;
+    gameOverScreen.style.display = "flex";
+
+    score = 0;
+    scoreEl.textContent = 0;
+    ammo = maxAmmo;
+    ammoEl.textContent = ammo;
+  }
+
+  document.addEventListener("click", () => {
+    if (!gameStarted) {
+      try { hitSound.play().catch(() => {}); } catch {}
+      gameStarted = true;
+      startGame();
+    } else if (!gameOver) {
+      if (reloading || ammo <= 0) return;
+
+      ammo--;
+      ammoEl.textContent = ammo;
+
+      if (ammo === 0) {
+        reloadAmmo();
+      }
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() === "r" && !reloading && ammo < maxAmmo && !gameOver) {
+      reloadAmmo();
+    }
+  });
+</script>
+
+</body>
+</html>
