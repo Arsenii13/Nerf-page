@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" width="device-width" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nerf Target Practice</title>
   <style>
     body {
@@ -12,7 +13,52 @@
       user-select: none;
       cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
     }
+     html, body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  user-select: none;
+  height: 100%;
+  width: 100%;
+  touch-action: manipulation;
+}
 
+body {
+  cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
+}
+
+@media (max-width: 768px) {
+  body {
+    cursor: default;
+    font-size: 16px;
+  }
+
+  #hud {
+    font-size: 1em;
+    padding: 8px 16px;
+  }
+
+  .target {
+    width: 70px;
+    height: 70px;
+  }
+
+  #gameOverScreen {
+    font-size: 1.5em;
+    padding: 20px;
+  }
+
+  #notFoundNote {
+    font-size: 0.85em;
+  }
+
+  #startText {
+    font-size: 1.2em;
+    padding: 14px 20px;
+  }
+}
     #hud {
       position: fixed;
       top: 20px;
@@ -116,6 +162,52 @@
 #notFoundNote a:hover {
   color: #ff6600;
 }
+    html, body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  user-select: none;
+  height: 100%;
+  width: 100%;
+  touch-action: manipulation;
+}
+
+body {
+  cursor: url('https://cur.cursors-4u.net/games/gam-2/gam170.cur'), crosshair;
+}
+
+@media (max-width: 768px) {
+  body {
+    cursor: default;
+    font-size: 16px;
+  }
+
+  #hud {
+    font-size: 1em;
+    padding: 8px 16px;
+  }
+
+  .target {
+    width: 70px;
+    height: 70px;
+  }
+
+  #gameOverScreen {
+    font-size: 1.5em;
+    padding: 20px;
+  }
+
+  #notFoundNote {
+    font-size: 0.85em;
+  }
+
+  #startText {
+    font-size: 1.2em;
+    padding: 14px 20px;
+  }
+  }
   </style>
 </head>
 <body>
@@ -175,7 +267,13 @@
   bestEl.textContent = best;
 
   const targetUrl = "https://www.clipartmax.com/png/full/98-983971_filetarget-svg-target-for-nerf.png";
+const margin = 100;
+const hudHeight = 100;
+const topLimit = hudHeight;
+const bottomLimit = window.innerHeight - margin;
 
+img.style.top = `${Math.random() * (bottomLimit - topLimit) + topLimit}px`;
+img.style.left = `${Math.random() * (window.innerWidth - margin)}px`;
   function spawnTarget() {
     if (document.querySelectorAll(".target").length >= 2 || gameOver) return;
 
