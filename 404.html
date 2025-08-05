@@ -97,13 +97,13 @@
       left: 50%;
       transform: translate(-50%, -50%);
       color: orange;
-      font-size: 2em;
+      font-size: 1.5em;
       z-index: 999;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.8);
       padding: 20px 30px;
       border-radius: 20px;
-      pointer-events: none;
       text-align: center;
+      cursor: pointer;
     }
 
     #notFoundNote {
@@ -154,8 +154,8 @@
       }
 
       #startText {
-        font-size: 1.2em;
-        padding: 14px 20px;
+        font-size: 1.3em;
+        padding: 18px 24px;
       }
     }
   </style>
@@ -169,7 +169,11 @@
   🔫 Mag: <span id="ammo">18</span>/<span id="maxAmmo">18</span>
 </div>
 
-<div id="startText">🟠 Wrong page?<br>Tap to play.<br><br>Or <a href="index.html">go home</a> / <a href="help.html">ask questions</a></div>
+<div id="startText" onclick="manualStart()">
+  ❌ Wrong page?<br><br>
+  👉 Tap to start the game<br><br>
+  🔗 Or <a href="index.html">go home</a> / <a href="help.html">ask questions</a>
+</div>
 
 <div id="gameOverScreen">
   <div>🕹️ Game Over</div>
@@ -195,20 +199,20 @@
   const startText = document.getElementById("startText");
 
   let score = 0;
-  let best = 0;
+  let best = localStorage.getItem("nerfBestScore") || 0;
   let time = 30;
   let gameInterval;
   let gameStarted = false;
   let gameOver = false;
-
   let ammo = 18;
   const maxAmmo = 18;
   let reloading = false;
 
-  maxAmmoEl.textContent = maxAmmo;
-  const storedBest = localStorage.getItem("nerfBestScore");
-  best = storedBest ? +storedBest : 0;
+  scoreEl.textContent = score;
   bestEl.textContent = best;
+  timerEl.textContent = time;
+  ammoEl.textContent = ammo;
+  maxAmmoEl.textContent = maxAmmo;
 
   const targetUrl = "https://www.clipartmax.com/png/full/98-983971_filetarget-svg-target-for-nerf.png";
 
@@ -233,7 +237,6 @@
       scoreEl.textContent = score;
 
       try { hitSound.currentTime = 0; hitSound.play(); } catch (e) {}
-
       showHitEffect(img);
       img.remove();
       spawnTarget();
@@ -264,6 +267,14 @@
     }, 2000);
   }
 
+  function manualStart() {
+    if (!gameStarted) {
+      gameStarted = true;
+      startText.style.display = "none";
+      startGame();
+    }
+  }
+
   function startGame() {
     score = 0;
     time = 30;
@@ -276,7 +287,6 @@
     ammoEl.textContent = ammo;
     bestEl.textContent = best;
     gameOverScreen.style.display = "none";
-    startText.style.display = "none";
     document.querySelectorAll(".target").forEach(t => t.remove());
 
     spawnTarget();
@@ -310,19 +320,14 @@
     finalScoreEl.textContent = score;
     finalBestEl.textContent = best;
     gameOverScreen.style.display = "flex";
-
     score = 0;
-    scoreEl.textContent = 0;
     ammo = maxAmmo;
-    ammoEl.textContent = ammo;
   }
 
   document.addEventListener("click", () => {
-    if (!gameStarted) {
-      try { hitSound.play().catch(() => {}); } catch {}
-      gameStarted = true;
-      startGame();
-    } else if (!gameOver) {
+    if (!gameStarted) return;
+
+    if (!gameOver) {
       if (reloading || ammo <= 0) return;
 
       ammo--;
