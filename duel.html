@@ -1,218 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blaster Duel</title>
+  <title>Nerf Arcade</title>
   <style>
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #222;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ff9900, #0066cc);
       color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    header {
       text-align: center;
-    }
-    h1 {
-      margin-top: 10px;
-      color: orange;
-    }
-    .game-area {
-      padding: 10px;
-    }
-    .bar-container {
-      width: 80%;
-      background: #444;
-      margin: 10px auto;
-      border-radius: 10px;
-      position: relative;
-      height: 25px;
-    }
-    .health-bar, .ammo-bar {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.3s;
-    }
-    .health-bar {
-      background: red;
-    }
-    .ammo-bar {
-      background: deepskyblue;
-    }
-    .bar-text {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      top: 0;
-      font-weight: bold;
-      line-height: 25px;
-    }
-    .controls button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .result {
-      margin: 15px;
-      font-size: 20px;
-      min-height: 40px;
-    }
-    .flash {
-      animation: flash 0.3s;
-    }
-    @keyframes flash {
-      0% { background-color: #f00; }
-      100% { background-color: transparent; }
-    }
-    .blaster {
-      height: 100px;
-      margin: 10px auto;
-    }
-    .mode-select {
       margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .game-card {
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+    }
+    .game-card:hover {
+      transform: scale(1.05);
+    }
+    .game-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    .game-card .info {
+      padding: 15px;
+    }
+    .game-card h3 {
+      margin-bottom: 10px;
+      color: #ff9900;
+    }
+    .game-card p {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .game-card a {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #ff9900;
+      color: #000;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .game-card a:hover {
+      background-color: #ffc107;
     }
   </style>
 </head>
 <body>
-  <h1>🔫 Blaster Duel 🔫</h1>
-
-  <div class="mode-select">
-    <label>Choose mode: </label>
-    <select id="mode">
-      <option value="ai">1P vs AI</option>
-      <option value="2p">2 Player</option>
-    </select>
-    <label>AI Difficulty: </label>
-    <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-    <button onclick="startGame()">Start</button>
+  <header>
+    <h1>Nerf Arcade</h1>
+    <p>Choose a game and unleash your inner Nerf warrior!</p>
+  </header>  <section class="game-grid">
+    <div class="game-card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Nerf_target.jpg/640px-Nerf_target.jpg" alt="Target Shooter" />
+      <div class="info">
+        <h3>🎯 Target Shooter</h3>
+        <p>Test your aim in a timed challenge. Hit as many targets as you can before time runs out!</p>
+        <a href="404.html">Play ▶</a>
+      </div>
+    </div><div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/3436/3436372.png" alt="Nerf Quiz" />
+  <div class="info">
+    <h3>🧠 Nerf Quiz</h3>
+    <p>Answer trivia questions about Nerf blasters, history, and more. Can you score 100%?</p>
+    <a href="quiz.html">Play ▶</a>
   </div>
+</div>
 
-  <div class="game-area" id="game" style="display:none">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Nerf_N-Strike_Maverick_REV-6.jpg/800px-Nerf_N-Strike_Maverick_REV-6.jpg" alt="Blaster" class="blaster">
-
-    <div class="bar-container">
-      <div class="health-bar" id="p1Health"></div>
-      <div class="bar-text" id="p1HealthText"></div>
-    </div>
-    <div class="bar-container">
-      <div class="ammo-bar" id="p1Ammo"></div>
-      <div class="bar-text" id="p1AmmoText"></div>
-    </div>
-    <hr />
-    <div class="bar-container">
-      <div class="health-bar" id="p2Health"></div>
-      <div class="bar-text" id="p2HealthText"></div>
-    </div>
-    <div class="bar-container">
-      <div class="ammo-bar" id="p2Ammo"></div>
-      <div class="bar-text" id="p2AmmoText"></div>
-    </div>
-
-    <div class="result" id="result">Choose your action!</div>
-    <div class="controls">
-      <button onclick="choose('shoot')">Shoot</button>
-      <button onclick="choose('reload')">Reload</button>
-      <button onclick="choose('dodge')">Dodge</button>
-    </div>
+<div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Duel Mode" />
+  <div class="info">
+    <h3>⚔️ Duel Mode</h3>
+    <p>Take turns with a friend in a quickdraw showdown. Fastest finger wins!</p>
+    <a href="duel.html">Play ▶</a>
   </div>
+</div>
 
-  <audio id="hitSound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+<div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/899/899209.png" alt="Clicker" />
+  <div class="info">
+    <h3>🔫 Nerf Clicker</h3>
+    <p>Click to shoot, upgrade your blaster, and earn points. Simple and addictive!</p>
+    <a href="clicker.html">Play ▶</a>
+  </div>
+</div>
 
-  <script>
-    let p1 = { hp: 3, ammo: 3 };
-    let p2 = { hp: 3, ammo: 3 };
-    const maxAmmo = 6;
-    let gameMode = 'ai';
-    let difficulty = 'easy';
-
-    function updateBars() {
-      const set = (id, value, max) => {
-        const el = document.getElementById(id);
-        el.style.width = `${(value / max) * 100}%`;
-        document.getElementById(id + 'Text').textContent = `${value} / ${max}`;
-      };
-      set('p1Health', p1.hp, 3);
-      set('p2Health', p2.hp, 3);
-      set('p1Ammo', p1.ammo, maxAmmo);
-      set('p2Ammo', p2.ammo, maxAmmo);
-    }
-
-    function startGame() {
-      p1 = { hp: 3, ammo: 3 };
-      p2 = { hp: 3, ammo: 3 };
-      gameMode = document.getElementById('mode').value;
-      difficulty = document.getElementById('difficulty').value;
-      document.getElementById('game').style.display = 'block';
-      updateBars();
-      document.getElementById('result').textContent = 'Choose your action!';
-    }
-
-    function choose(p1Action) {
-      const p2Action = gameMode === 'ai' ? aiChoose() : prompt("P2: shoot, reload, dodge");
-      resolveTurn(p1Action, p2Action);
-    }
-
-    function aiChoose() {
-      if (difficulty === 'easy') return randomAction();
-      if (difficulty === 'medium') {
-        return Math.random() < 0.5 ? 'shoot' : randomAction();
-      }
-      // Hard: prioritize dodge if player has ammo
-      return p1.ammo > 0 ? 'dodge' : 'reload';
-    }
-
-    function randomAction() {
-      const actions = ['shoot', 'reload', 'dodge'];
-      return actions[Math.floor(Math.random() * actions.length)];
-    }
-
-    function resolveTurn(a1, a2) {
-      const hitSound = document.getElementById('hitSound');
-      let msg = `P1 chose ${a1}, P2 chose ${a2}.\n`;
-
-      const applyShoot = (attacker, defender, attackerId, defenderId) => {
-        if (attacker.ammo > 0) {
-          attacker.ammo--;
-          const hit = defender.action !== 'dodge' || Math.random() > 0.5;
-          if (hit) {
-            defender.hp--;
-            document.body.classList.add('flash');
-            hitSound.play();
-            setTimeout(() => document.body.classList.remove('flash'), 200);
-            msg += `${attackerId} hits ${defenderId}!\n`;
-          } else {
-            msg += `${defenderId} dodged the shot!\n`;
-          }
-        } else {
-          msg += `${attackerId} tried to shoot but had no ammo!\n`;
-        }
-      };
-
-      p1.action = a1;
-      p2.action = a2;
-
-      if (a1 === 'shoot') applyShoot(p1, p2, 'P1', 'P2');
-      if (a2 === 'shoot') applyShoot(p2, p1, 'P2', 'P1');
-
-      if (a1 === 'reload') p1.ammo = Math.min(maxAmmo, p1.ammo + 1);
-      if (a2 === 'reload') p2.ammo = Math.min(maxAmmo, p2.ammo + 1);
-
-      updateBars();
-      document.getElementById('result').textContent = msg;
-
-      if (p1.hp <= 0 || p2.hp <= 0) {
-        setTimeout(() => {
-          alert((p1.hp <= 0 ? 'P2' : 'P1') + ' wins!');
-          startGame();
-        }, 500);
-      }
-    }
-  </script>
+  </section>
 </body>
 </html>
