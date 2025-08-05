@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nerf Arcade</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ff9900, #0066cc);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .game-card {
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+    }
+    .game-card:hover {
+      transform: scale(1.05);
+    }
+    .game-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    .game-card .info {
+      padding: 15px;
+    }
+    .game-card h3 {
+      margin-bottom: 10px;
+      color: #ff9900;
+    }
+    .game-card p {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .game-card a {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #ff9900;
+      color: #000;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .game-card a:hover {
+      background-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nerf Arcade</h1>
+    <p>Choose a game and unleash your inner Nerf warrior!</p>
+  </header>  <section class="game-grid">
+    <div class="game-card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Nerf_target.jpg/640px-Nerf_target.jpg" alt="Target Shooter" />
+      <div class="info">
+        <h3>🎯 Target Shooter</h3>
+        <p>Test your aim in a timed challenge. Hit as many targets as you can before time runs out!</p>
+        <a href="404.html">Play ▶</a>
+      </div>
+    </div><div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/3436/3436372.png" alt="Nerf Quiz" />
+  <div class="info">
+    <h3>🧠 Nerf Quiz</h3>
+    <p>Answer trivia questions about Nerf blasters, history, and more. Can you score 100%?</p>
+    <a href="quiz.html">Play ▶</a>
+  </div>
+</div>
+
+<div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Duel Mode" />
+  <div class="info">
+    <h3>⚔️ Duel Mode</h3>
+    <p>Take turns with a friend in a quickdraw showdown. Fastest finger wins!</p>
+    <a href="duel.html">Play ▶</a>
+  </div>
+</div>
+
+<div class="game-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/899/899209.png" alt="Clicker" />
+  <div class="info">
+    <h3>🔫 Nerf Clicker</h3>
+    <p>Click to shoot, upgrade your blaster, and earn points. Simple and addictive!</p>
+    <a href="clicker.html">Play ▶</a>
+  </div>
+</div>
+
+  </section>
+</body>
+</html>
