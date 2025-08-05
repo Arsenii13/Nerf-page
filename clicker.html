@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nerf Clicker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffcc00, #ff6600);
+      text-align: center;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #score {
+      font-size: 2rem;
+      margin: 10px 0;
+    }
+    #clicker {
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Nerf_Strongarm_Blaster.jpg/800px-Nerf_Strongarm_Blaster.jpg') no-repeat center/cover;
+      width: 200px;
+      height: 150px;
+      border: none;
+      border-radius: 12px;
+      margin: 20px;
+      cursor: url('https://cur.cursors-4u.net/toons/too-6/too564.cur'), auto;
+    }
+    #upgrades {
+      margin-top: 30px;
+    }
+    button.upgrade {
+      padding: 10px 15px;
+      margin: 10px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: #222;
+      color: white;
+      cursor: pointer;
+    }
+    button.upgrade:disabled {
+      background-color: #999;
+    }
+    #message {
+      margin-top: 20px;
+      font-style: italic;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔫 Nerf Clicker</h1>
+  <div id="score">Shots: 0</div>
+  <button id="clicker" title="Click to shoot!"></button>  <div id="upgrades">
+    <h2>Upgrades</h2>
+    <button class="upgrade" id="upgrade1">+1 per click (Cost: 10)</button>
+    <button class="upgrade" id="upgrade2">Auto-fire (Cost: 50)</button>
+  </div>  <div id="message"></div>  <script>
+    let shots = parseInt(localStorage.getItem("nerf_shots")) || 0;
+    let perClick = parseInt(localStorage.getItem("nerf_per_click")) || 1;
+    let autoFire = localStorage.getItem("nerf_autofire") === 'true';
+
+    const scoreDisplay = document.getElementById("score");
+    const message = document.getElementById("message");
+    const clicker = document.getElementById("clicker");
+
+    function updateDisplay() {
+      scoreDisplay.textContent = `Shots: ${shots}`;
+      localStorage.setItem("nerf_shots", shots);
+      localStorage.setItem("nerf_per_click", perClick);
+      localStorage.setItem("nerf_autofire", autoFire);
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+      setTimeout(() => message.textContent = '', 2000);
+    }
+
+    clicker.addEventListener("click", () => {
+      shots += perClick;
+      updateDisplay();
+    });
+
+    document.getElementById("upgrade1").addEventListener("click", () => {
+      if (shots >= 10) {
+        shots -= 10;
+        perClick++;
+        updateDisplay();
+        showMessage("You upgraded your blaster!");
+      } else {
+        showMessage("Not enough shots!");
+      }
+    });
+
+    document.getElementById("upgrade2").addEventListener("click", () => {
+      if (shots >= 50 && !autoFire) {
+        shots -= 50;
+        autoFire = true;
+        updateDisplay();
+        showMessage("Auto-fire activated!");
+        startAutoFire();
+      } else if (autoFire) {
+        showMessage("Already active!");
+      } else {
+        showMessage("Not enough shots!");
+      }
+    });
+
+    function startAutoFire() {
+      setInterval(() => {
+        if (autoFire) {
+          shots += perClick;
+          updateDisplay();
+        }
+      }, 2000);
+    }
+
+    if (autoFire) {
+      startAutoFire();
+    }
+
+    updateDisplay();
+  </script></body>
+</html>
