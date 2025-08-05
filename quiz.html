@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nerf Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffcc00, #ff6600);
+      color: #222;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    #quiz-container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    .answer-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #ff6600;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .answer-btn.correct {
+      background-color: #28a745 !important;
+    }
+    .answer-btn.wrong {
+      background-color: #dc3545 !important;
+    }
+    .answer-btn:hover {
+      background: #cc5200;
+    }
+    #score-box {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    #start-btn {
+      padding: 12px 24px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      cursor: pointer;
+    }
+    #timer {
+      font-weight: bold;
+      margin: 10px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔫 Nerf Knowledge Quiz</h1>
+  <div id="quiz-container">
+    <button id="start-btn">Start Quiz</button>
+  </div>
+  <audio id="bg-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_bfccdb9ba9.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="correct-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/17/audio_1d19bdfbe4.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="wrong-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/17/audio_f3451b0bd5.mp3" type="audio/mpeg">
+  </audio>  <script>
+    const quizData = [
+      {
+        question: "What year was the Nerf brand introduced?",
+        answers: ["1989", "1995", "2001", "1983"],
+        correct: 0
+      },
+      {
+        question: "Which blaster is part of the Elite series?",
+        answers: ["Strongarm", "Rebelle Heartbreaker", "Modulus Recon", "Mega Mastodon"],
+        correct: 0
+      },
+      {
+        question: "Which darts are the largest?",
+        answers: ["Mega Darts", "Elite Darts", "Rival Balls", "AccuStrike Darts"],
+        correct: 0
+      },
+      {
+        question: "What does NERF stand for?",
+        answers: [
+          "Non-Expanding Recreational Foam",
+          "Nylon Energy Rapid Fire",
+          "No Effort Real Fun",
+          "Nothing Except Real Foam"
+        ],
+        correct: 0
+      },
+      {
+        question: "Which Nerf line uses foam balls instead of darts?",
+        answers: ["Rival", "Elite", "Ultra", "Zombie Strike"],
+        correct: 0
+      },
+      {
+        question: "Which blaster features slam-fire mode?",
+        answers: ["Strongarm", "Firestrike", "Jolt", "Barricade"],
+        correct: 0
+      },
+      {
+        question: "Which series is known for long-range shooting?",
+        answers: ["Ultra", "Modulus", "Rebelle", "Zombie Strike"],
+        correct: 0
+      }
+    ];
+
+    const container = document.getElementById("quiz-container");
+    const startBtn = document.getElementById("start-btn");
+    const bgMusic = document.getElementById("bg-music");
+    const correctSound = document.getElementById("correct-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let countdown;
+    let bestScore = localStorage.getItem("nerfQuizBest") || 0;
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function startQuiz() {
+      shuffleArray(quizData);
+      bgMusic.volume = 0.2;
+      bgMusic.play();
+      startBtn.style.display = "none";
+      score = 0;
+      currentQuestion = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = quizData[currentQuestion];
+      const randomizedAnswers = [...q.answers];
+      shuffleArray(randomizedAnswers);
+
+      container.innerHTML = `<div id="timer">⏱️ 15</div><div class="question">${q.question}</div>`;
+      let correctAnswerText = q.answers[q.correct];
+      randomizedAnswers.forEach(answer => {
+        const btn = document.createElement("button");
+        btn.classList.add("answer-btn");
+        btn.textContent = answer;
+        btn.onclick = () => checkAnswer(btn, answer === correctAnswerText);
+        container.appendChild(btn);
+      });
+
+      let timeLeft = 15;
+      countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `⏱️ ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          showNextQuestion(false);
+        }
+      }, 1000);
+    }
+
+    function checkAnswer(btn, isCorrect) {
+      clearInterval(countdown);
+      if (isCorrect) {
+        score++;
+        btn.classList.add("correct");
+        correctSound.play();
+      } else {
+        btn.classList.add("wrong");
+        wrongSound.play();
+      }
+      setTimeout(() => showNextQuestion(), 800);
+    }
+
+    function showNextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        showQuestion();
+      } else {
+        showScore();
+      }
+    }
+
+    function showScore() {
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem("nerfQuizBest", bestScore);
+      }
+      container.innerHTML = `
+        <h2>Quiz Finished!</h2>
+        <p>Your score: ${score}/${quizData.length}</p>
+        <p>🏆 Best score: ${bestScore}</p>
+        <button onclick="location.reload()">Play Again</button>
+      `;
+    }
+
+    startBtn.onclick = startQuiz;
+  </script></body>
+</html>
