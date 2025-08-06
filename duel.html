@@ -2,117 +2,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nerf Arcade</title>
+  <title>Blaster Duel</title>
   <style>
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
       padding: 0;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #ff9900, #0066cc);
+      font-family: 'Impact', sans-serif;
+      background: url('https://i.imgur.com/uxZD4Ez.jpg') no-repeat center center/cover;
       color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    header {
       text-align: center;
-      margin-bottom: 20px;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 1000px;
-    }
-    .game-card {
-      background: #222;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      transition: transform 0.2s;
-    }
-    .game-card:hover {
-      transform: scale(1.05);
-    }
-    .game-card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-    }
-    .game-card .info {
-      padding: 15px;
-    }
-    .game-card h3 {
-      margin-bottom: 10px;
-      color: #ff9900;
-    }
-    .game-card p {
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-    }
-    .game-card a {
-      display: inline-block;
-      padding: 10px 15px;
-      background-color: #ff9900;
-      color: #000;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .game-card a:hover {
-      background-color: #ffc107;
-    }
+    }h1 {
+  font-size: 3em;
+  margin: 20px 0;
+  text-shadow: 2px 2px #000;
+}
+
+.game-area {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 15px;
+  box-shadow: 0 0 20px #ff6600;
+}
+
+.health-bar, .ammo-bar {
+  height: 20px;
+  background-color: red;
+  margin: 10px;
+  border: 2px solid white;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ammo-bar { background-color: #0099ff; }
+
+.bar-inner {
+  height: 100%;
+  background-color: limegreen;
+  width: 100%;
+  transition: width 0.3s ease;
+}
+
+.bar-number {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  color: white;
+  font-weight: bold;
+}
+
+.btns button {
+  margin: 10px;
+  padding: 15px 25px;
+  font-size: 1.2em;
+  cursor: pointer;
+  background: #ffa500;
+  border: none;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.btns button:hover {
+  background: #ff6600;
+}
+
+#result {
+  font-size: 1.3em;
+  margin-top: 20px;
+  min-height: 40px;
+}
+
+.flash {
+  animation: flash 0.3s;
+}
+
+@keyframes flash {
+  0% { background-color: red; }
+  100% { background-color: transparent; }
+}
+
+audio {
+  display: none;
+}
+
   </style>
 </head>
 <body>
-  <header>
-    <h1>Nerf Arcade</h1>
-    <p>Choose a game and unleash your inner Nerf warrior!</p>
-  </header>  <section class="game-grid">
-    <div class="game-card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Nerf_target.jpg/640px-Nerf_target.jpg" alt="Target Shooter" />
-      <div class="info">
-        <h3>🎯 Target Shooter</h3>
-        <p>Test your aim in a timed challenge. Hit as many targets as you can before time runs out!</p>
-        <a href="404.html">Play ▶</a>
-      </div>
-    </div><div class="game-card">
-  <img src="https://cdn-icons-png.flaticon.com/512/3436/3436372.png" alt="Nerf Quiz" />
-  <div class="info">
-    <h3>🧠 Nerf Quiz</h3>
-    <p>Answer trivia questions about Nerf blasters, history, and more. Can you score 100%?</p>
-    <a href="quiz.html">Play ▶</a>
-  </div>
+  <h1>Blaster Duel</h1>
+  <div class="game-area">
+    <p id="modeSelect">
+      Choose Mode:<br />
+      <button onclick="startGame('1p')">1 Player</button>
+      <button onclick="startGame('2p')">2 Player</button>
+    </p><div id="difficultySelect" style="display:none">
+  Choose AI Difficulty:<br />
+  <button onclick="setDifficulty('easy')">Easy</button>
+  <button onclick="setDifficulty('medium')">Medium</button>
+  <button onclick="setDifficulty('hard')">Hard</button>
 </div>
 
-<div class="game-card">
-  <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Duel Mode" />
-  <div class="info">
-    <h3>⚔️ Duel Mode</h3>
-    <p>Take turns with a friend in a quickdraw showdown. Fastest finger wins!</p>
-    <a href="duel.html">Play ▶</a>
+<div id="game" style="display:none">
+  <p><strong>Player 1 HP</strong></p>
+  <div class="health-bar"><div class="bar-inner" id="p1HpBar"></div><span class="bar-number" id="p1HpText"></span></div>
+  <p><strong>Player 1 Ammo</strong></p>
+  <div class="ammo-bar"><div class="bar-inner" id="p1AmmoBar"></div><span class="bar-number" id="p1AmmoText"></span></div>
+
+  <p><strong>Player 2 HP</strong></p>
+  <div class="health-bar"><div class="bar-inner" id="p2HpBar"></div><span class="bar-number" id="p2HpText"></span></div>
+  <p><strong>Player 2 Ammo</strong></p>
+  <div class="ammo-bar"><div class="bar-inner" id="p2AmmoBar"></div><span class="bar-number" id="p2AmmoText"></span></div>
+
+  <div class="btns">
+    <button onclick="playerAction('shoot')">Shoot</button>
+    <button onclick="playerAction('reload')">Reload</button>
+    <button onclick="playerAction('dodge')">Dodge</button>
   </div>
+  <p id="result"></p>
+  <p id="scoreDisplay"></p>
+  <button onclick="location.reload()">Reset Game</button>
 </div>
 
-<div class="game-card">
-  <img src="https://cdn-icons-png.flaticon.com/512/899/899209.png" alt="Clicker" />
-  <div class="info">
-    <h3>🔫 Nerf Clicker</h3>
-    <p>Click to shoot, upgrade your blaster, and earn points. Simple and addictive!</p>
-    <a href="clicker.html">Play ▶</a>
-  </div>
-</div>
+  </div><audio id="shootSound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio> <audio id="hitSound" src="https://www.fesliyanstudios.com/play-mp3/4381"></audio> <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/21/audio_7fdc9d00e3.mp3" loop autoplay></audio>
 
-  </section>
-</body>
+  <script>
+    let mode = "", aiLevel = "easy";
+    let p1 = { hp: 3, ammo: 6 };
+    let p2 = { hp: 3, ammo: 6 };
+    let currentPlayer = 1;
+    let playerChoice = "";
+    let scores = JSON.parse(localStorage.getItem("blasterScores") || "{\"1p\":0,\"2p\":0}");
+
+    function updateBars() {
+      const p1HpPercent = (p1.hp / 3) * 100;
+      const p2HpPercent = (p2.hp / 3) * 100;
+      const p1AmmoPercent = (p1.ammo / 6) * 100;
+      const p2AmmoPercent = (p2.ammo / 6) * 100;
+
+      document.getElementById("p1HpBar").style.width = `${p1HpPercent}%`;
+      document.getElementById("p2HpBar").style.width = `${p2HpPercent}%`;
+      document.getElementById("p1AmmoBar").style.width = `${p1AmmoPercent}%`;
+      document.getElementById("p2AmmoBar").style.width = `${p2AmmoPercent}%`;
+
+      document.getElementById("p1HpText").textContent = `${p1.hp}/3`;
+      document.getElementById("p2HpText").textContent = `${p2.hp}/3`;
+      document.getElementById("p1AmmoText").textContent = `${p1.ammo}/6`;
+      document.getElementById("p2AmmoText").textContent = `${p2.ammo}/6`;
+    }
+
+    function startGame(selectedMode) {
+      mode = selectedMode;
+      document.getElementById("modeSelect").style.display = "none";
+      if (mode === "1p") {
+        document.getElementById("difficultySelect").style.display = "block";
+      } else {
+        document.getElementById("game").style.display = "block";
+        updateBars();
+        displayScores();
+      }
+    }
+
+    function setDifficulty(level) {
+      aiLevel = level;
+      document.getElementById("difficultySelect").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      updateBars();
+      displayScores();
+    }
+
+    function displayScores() {
+      document.getElementById("scoreDisplay").textContent = `Wins: ${scores[mode] || 0}`;
+    }
+
+    function playerAction(action) {
+      if (mode === "1p") {
+        const aiAction = getAIAction();
+        resolveTurn(action, aiAction);
+      } else {
+        if (!playerChoice) {
+          playerChoice = action;
+          document.getElementById("result").textContent = "Player 2's turn...";
+        } else {
+          resolveTurn(playerChoice, action);
+          playerChoice = "";
+        }
+      }
+    }
+
+    function getAIAction() {
+      if (aiLevel === "easy") return ["shoot","reload","dodge"][Math.floor(Math.random()*3)];
+      if (aiLevel === "medium") return p2.ammo > 0 ? "shoot" : "reload";
+      if (aiLevel === "hard") {
+        if (p2.ammo === 0) return "reload";
+        if (p1.ammo > 0) return "dodge";
+        return "shoot";
+      }
+    }
+
+    function resolveTurn(p1Action, p2Action) {
+      const shootSFX = document.getElementById("shootSound");
+      const hitSFX = document.getElementById("hitSound");
+
+      let msg = `P1: ${p1Action.toUpperCase()} vs P2: ${p2Action.toUpperCase()}<br>`;
+
+      if (p1Action === "shoot" && p1.ammo > 0) {
+        shootSFX.play();
+        p1.ammo--;
+        if (p2Action === "reload" || (p2Action === "dodge" && Math.random() > 0.5)) {
+          p2.hp--;
+          hitSFX.play();
+          document.body.classList.add("flash");
+        }
+      }
+
+      if (p2Action === "shoot" && p2.ammo > 0) {
+        shootSFX.play();
+        p2.ammo--;
+        if (p1Action === "reload" || (p1Action === "dodge" && Math.random() > 0.5)) {
+          p1.hp--;
+          hitSFX.play();
+          document.body.classList.add("flash");
+        }
+      }
+
+      if (p1Action === "reload") p1.ammo = Math.min(6, p1.ammo + 1);
+      if (p2Action === "reload") p2.ammo = Math.min(6, p2.ammo + 1);
+
+      msg += `Player 1: ${p1.hp} HP, ${p1.ammo} Ammo<br>`;
+      msg += `Player 2: ${p2.hp} HP, ${p2.ammo} Ammo`;
+
+      updateBars();
+
+      setTimeout(() => document.body.classList.remove("flash"), 300);
+
+      document.getElementById("result").innerHTML = msg;
+
+      if (p1.hp <= 0 || p2.hp <= 0) {
+        const winner = p1.hp > 0 ? "Player 1 Wins!" : "Player 2 Wins!";
+        document.getElementById("result").innerHTML += `<br><strong>${winner}</strong>`;
+        scores[mode] = (scores[mode] || 0) + (p1.hp > 0 ? 1 : 0);
+        localStorage.setItem("blasterScores", JSON.stringify(scores));
+        displayScores();
+      }
+    }
+  </script></body>
 </html>
