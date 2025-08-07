@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nerf Disruptor</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 50;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      max-height: 80vh;
+      overflow-y: auto;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- ✅ Navbar -->
+  <nav class="bg-white shadow p-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="index.html" class="text-xl font-bold text-blue-600">🔧 Nerf Mods</a>
+      <div>
+        <a href="index.html" class="text-gray-700 hover:text-blue-600">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-6">
+    <!-- ✅ Blaster Image and Info -->
+    <img src="disruptor.png" alt="Nerf Disruptor" class="w-full max-w-md mx-auto rounded-lg shadow mb-6">
+
+    <div class="flex justify-center gap-4 mb-6">
+      <button id="buyBtn" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">Buy</button>
+      <button id="modsBtn" class="bg-yellow-500 text-white px-6 py-2 rounded shadow hover:bg-yellow-600">Mods</button>
+    </div>
+
+    <p class="text-gray-800 text-lg mb-6">
+      The Nerf Disruptor is a revolver-style blaster with a 6-dart rotating drum and slam-fire capability. Known for its reliability, smooth action, and ease of modification. Perfect for casual games and modding beginners.
+    </p>
+
+    <!-- ✅ Blaster Spec Table -->
+    <table class="w-full table-auto border border-gray-300 rounded mb-6 bg-white shadow">
+      <thead class="bg-gray-100 text-left">
+        <tr>
+          <th class="p-2">Spec</th>
+          <th class="p-2">Stock</th>
+          <th class="p-2">Easy Mods</th>
+          <th class="p-2">Heavy Mods</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t">
+          <td class="p-2 font-medium">Size</td>
+          <td class="p-2">Medium</td>
+          <td class="p-2">Medium</td>
+          <td class="p-2">Medium</td>
+        </tr>
+        <tr class="border-t">
+          <td class="p-2 font-medium">FPS</td>
+          <td class="p-2">70</td>
+          <td class="p-2">85</td>
+          <td class="p-2">110+</td>
+        </tr>
+        <tr class="border-t">
+          <td class="p-2 font-medium">Range</td>
+          <td class="p-2">15m</td>
+          <td class="p-2">22m</td>
+          <td class="p-2">30m+</td>
+        </tr>
+        <tr class="border-t">
+          <td class="p-2 font-medium">Rate of Fire</td>
+          <td class="p-2">2 darts/sec</td>
+          <td class="p-2">3 darts/sec</td>
+          <td class="p-2">4+ darts/sec</td>
+        </tr>
+        <tr class="border-t">
+          <td class="p-2 font-medium">Mag Size</td>
+          <td class="p-2">6</td>
+          <td class="p-2">6</td>
+          <td class="p-2">6</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ✅ Average Rating -->
+    <p id="avgRating" class="text-gray-800 font-medium mb-4"></p>
+
+    <!-- ✅ Comment Input -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold mb-2">💬 Leave a comment</h3>
+      <textarea id="commentInput" placeholder="Write your comment here..." class="w-full p-2 border border-gray-300 rounded mb-2"></textarea>
+      <button id="submitComment" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
+    </div>
+
+    <!-- ✅ Comment List -->
+    <ul id="commentList" class="space-y-3"></ul>
+  </main>
+
+  <!-- ✅ Buy Modal -->
+  <div id="buyModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Buy – Disruptor</h3>
+      <ul class="list-disc pl-4 space-y-2">
+        <li><strong>US:</strong> $14.99 – <a href="#">Amazon US</a></li>
+        <li><strong>UK:</strong> £12.99 – <a href="#">Amazon UK</a></li>
+        <li><strong>DE:</strong> €13.99 – <a href="#">Amazon DE</a></li>
+        <li><strong>IN:</strong> ₹1199 – <a href="#">Amazon IN</a></li>
+        <li><strong>AU:</strong> $24.95 – <a href="#">Amazon AU</a></li>
+        <li><strong>JP:</strong> ¥1800 – <a href="#">Amazon JP</a></li>
+        <li><strong>BR:</strong> R$79 – <a href="#">Amazon BR</a></li>
+        <li><strong>CA:</strong> $17.99 – <a href="#">Amazon CA</a></li>
+        <li><strong>UA:</strong> ₴599 – <a href="#">Rozetka</a></li>
+        <li><strong>ZA:</strong> R239 – <a href="#">Takealot</a></li>
+      </ul>
+      <button onclick="closeModal('buyModal')" class="mt-4 bg-gray-300 px-4 py-2 rounded">Close</button>
+    </div>
+  </div>
+
+  <!-- ✅ Mods Modal -->
+  <div id="modsModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Mods for Disruptor</h3>
+      <ul class="list-disc pl-4 space-y-4">
+        <li>
+          <strong>Spring Upgrade:</strong> Increase dart velocity and range.<br>
+          <em>Instruction:</em> Open shell, replace stock spring with a 7kg+ one.<br>
+          <button class="mt-2 bg-blue-600 text-white px-3 py-1 rounded">Buy Needed</button>
+        </li>
+        <li>
+          <strong>PTFE Tape Air Seal:</strong> Improve consistency.<br>
+          <em>Instruction:</em> Apply PTFE tape around the plunger tube.<br>
+          <button class="mt-2 bg-blue-600 text-white px-3 py-1 rounded">Buy Needed</button>
+        </li>
+        <li>
+          <strong>Trigger Response Mod:</strong> Shortens trigger pull.<br>
+          <em>Instruction:</em> Install return spring and polish internal points.<br>
+          <button class="mt-2 bg-blue-600 text-white px-3 py-1 rounded">Buy Needed</button>
+        </li>
+      </ul>
+      <button onclick="closeModal('modsModal')" class="mt-4 bg-gray-300 px-4 py-2 rounded">Close</button>
+    </div>
+  </div>
+
+  <!-- ✅ Firebase + Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyA4PLT4pUNfc5YHHXWF9ObyMSk6E4aEJ_Y",
+      authDomain: "nerf-mods-website.firebaseapp.com",
+      databaseURL: "https://nerf-mods-website-default-rtdb.firebaseio.com",
+      projectId: "nerf-mods-website",
+      storageBucket: "nerf-mods-website.appspot.com",
+      messagingSenderId: "577649234387",
+      appId: "1:577649234387:web:61e2b2f40e6508146f1f26",
+    });
+
+    const db = getDatabase(app);
+    const commentInput = document.getElementById("commentInput");
+    const submitComment = document.getElementById("submitComment");
+    const commentList = document.getElementById("commentList");
+    const avgRating = document.getElementById("avgRating");
+    const blasterId = "disruptor";
+
+    submitComment.onclick = () => {
+      const text = commentInput.value.trim();
+      if (!text) return;
+      push(ref(db, "comments/" + blasterId), { comment: text });
+      commentInput.value = "";
+    };
+
+    onValue(ref(db, "comments/" + blasterId), (snapshot) => {
+      commentList.innerHTML = "";
+      let count = 0;
+      snapshot.forEach((child) => {
+        const { comment } = child.val();
+        const li = document.createElement("li");
+        li.className = "bg-white p-3 border rounded";
+        li.textContent = comment;
+        commentList.appendChild(li);
+        count++;
+      });
+      avgRating.textContent = count > 0 ? `🗨️ ${count} comment${count > 1 ? "s" : ""}` : "No comments yet.";
+    });
+
+    // Modal handlers
+    document.getElementById("buyBtn").onclick = () => showModal("buyModal");
+    document.getElementById("modsBtn").onclick = () => showModal("modsModal");
+    function showModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+  </script>
+</body>
+</html>

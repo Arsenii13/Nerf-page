@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nerf Blaster Catalog</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6 font-sans">
+  <h1 class="text-3xl font-bold text-center mb-6">🔫 Nerf Blaster Catalog</h1>
+
+  <div class="max-w-4xl mx-auto mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <select id="companyFilter" class="p-2 border rounded">
+      <option value="">All Companies</option>
+      <option value="Hasbro">Hasbro</option>
+      <option value="X-shot">X-shot</option>
+      <option value="Worker">Worker</option>
+      <option value="Others">Others</option>
+    </select>
+
+    <select id="seriesFilter" class="p-2 border rounded">
+      <option value="">All Series</option>
+      <option value="Elite">Elite</option>
+      <option value="Elite 2.0">Elite 2.0</option>
+      <option value="Ultra">Ultra</option>
+      <option value="Others">Others</option>
+    </select>
+  </div>
+
+  <div class="max-w-xl mx-auto mb-8">
+    <input type="text" id="searchInput" autocomplete="off" placeholder="Search blasters..." class="w-full p-3 border border-gray-300 rounded" />
+    <div id="suggestions" class="bg-white shadow-md mt-1"></div>
+  </div>
+
+  <div id="catalog" class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Blaster cards -->
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4PLT4pUNfc5YHHXWF9ObyMSk6E4aEJ_Y",
+      authDomain: "nerf-mods-website.firebaseapp.com",
+      databaseURL: "https://nerf-mods-website-default-rtdb.firebaseio.com",
+      projectId: "nerf-mods-website",
+      storageBucket: "nerf-mods-website.firebasestorage.app",
+      messagingSenderId: "577649234387",
+      appId: "1:577649234387:web:61e2b2f40e6508146f1f26"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const blasters = [
+      {
+        id: "disruptor",
+        name: "Nerf Disruptor",
+        company: "Hasbro",
+        series: "Elite"
+      },
+      {
+        id: "falconfire",
+        name: "Nerf Falconfire",
+        company: "Hasbro",
+        series: "AccuStrike"
+      },
+      {
+        id: "motoblitz",
+        name: "Nerf Motoblitz",
+        company: "Hasbro",
+        series: "Elite 2.0"
+      },
+      {
+        id: "rapidstrike",
+        name: "Nerf RapidStrike",
+        company: "Hasbro",
+        series: "Elite"
+      },
+      {
+        id: "workerp90",
+        name: "Worker P90",
+        company: "Worker",
+        series: "Others"
+      },
+      {
+        id: "xshotcrusher",
+        name: "X-shot Crusher",
+        company: "X-shot",
+        series: "Others"
+      }
+    ];
+
+    const input = document.getElementById("searchInput");
+    const suggestions = document.getElementById("suggestions");
+    const catalog = document.getElementById("catalog");
+    const companyFilter = document.getElementById("companyFilter");
+    const seriesFilter = document.getElementById("seriesFilter");
+
+    function openBlasterPage(blasterId) {
+      window.location.href = `${blasterId}.html`;
+    }
+
+    input.addEventListener("input", () => {
+      const value = input.value.toLowerCase();
+      suggestions.innerHTML = "";
+      if (!value) return;
+
+      const matches = blasters.filter(b => b.name.toLowerCase().includes(value));
+      matches.forEach(blaster => {
+        const div = document.createElement("div");
+        div.className = "autocomplete-suggestion p-2 cursor-pointer flex gap-2 items-center";
+        const ext = blaster.id === "motoblitz" ? "jpg" : "png";
+        div.innerHTML = `<img src="${blaster.id}.${ext}" class="w-10 h-10"/> <span>${blaster.name}</span>`;
+        div.onclick = () => openBlasterPage(blaster.id);
+        suggestions.appendChild(div);
+      });
+    });
+
+    function fetchAvgRating(blasterId, callback) {
+      const commentRef = ref(db, "comments/" + blasterId);
+      onValue(commentRef, (snapshot) => {
+        let total = 0, count = 0;
+        snapshot.forEach(child => {
+          const data = child.val();
+          if (data.rating) {
+            total += data.rating;
+            count++;
+          }
+        });
+        const avg = count ? (total / count).toFixed(1) : "N/A";
+        callback(avg);
+      });
+    }
+
+    function renderCatalog() {
+      const company = companyFilter.value;
+      const series = seriesFilter.value;
+      catalog.innerHTML = "";
+
+      blasters
+        .filter(b =>
+          (!company || b.company === company) &&
+          (!series || b.series === series)
+        )
+        .forEach(blaster => {
+          const card = document.createElement("div");
+          card.className = "bg-white rounded shadow p-4 hover:shadow-lg transition relative";
+          card.style.cursor = "pointer";
+          card.onclick = () => openBlasterPage(blaster.id);
+
+          const ext = blaster.id === "motoblitz" ? "jpg" : "png";
+          card.innerHTML = `
+            <img src="${blaster.id}.${ext}" alt="${blaster.name}" class="w-full h-48 object-contain mb-3" />
+            <h2 class="text-lg font-bold mb-1">${blaster.name}</h2>
+            <p class="text-sm text-gray-500 mb-1">${blaster.company} – ${blaster.series}</p>
+            <p class="text-sm text-yellow-600 font-semibold">Loading rating...</p>
+          `;
+
+          catalog.appendChild(card);
+
+          const ratingP = card.querySelector("p.text-yellow-600");
+          fetchAvgRating(blaster.id, (avg) => {
+            ratingP.textContent = avg !== "N/A" ? `⭐ Average Rating: ${avg}` : "No ratings";
+          });
+        });
+    }
+
+    companyFilter.addEventListener("change", renderCatalog);
+    seriesFilter.addEventListener("change", renderCatalog);
+
+    renderCatalog();
+  </script>
+</body>
+</html>

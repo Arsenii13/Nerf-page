@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nerf Help Page</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+      padding: 1rem;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 999;
+    }
+    nav a {
+      text-decoration: none;
+      color: #0077cc;
+      font-weight: bold;
+      margin: 0 1rem 0 0;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .preview {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.5rem;
+      min-height: 50px;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: #0077cc;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      margin: 0.5rem 0.5rem 0 0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover:not([disabled]) {
+      background: #005fa3;
+    }
+    .question {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .timestamp {
+      color: #888;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    .answer {
+      background: #e6ffe6;
+      border-left: 4px solid green;
+      padding: 0.5rem;
+      margin-top: 0.75rem;
+      border-radius: 4px;
+    }
+    .reply {
+      margin-top: 0.4rem;
+      padding-left: 1rem;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    .like-dislike {
+      margin-top: 0.5rem;
+    }
+    .markdown {
+      margin-top: 0.5rem;
+    }
+    @media (max-width: 600px) {
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <!-- Marked + Twemoji -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="courses.html">Learn</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Ask a Question</h1>
+    <textarea id="questionText" rows="4" placeholder="Type your question in Markdown..."></textarea>
+    <div class="preview" id="markdownPreview"></div>
+    <label><input type="checkbox" id="isPrivate" /> Ask privately</label><br />
+    <button onclick="submitQuestion()">Ask</button>
+    <button onclick="loadMyPrivateQuestions()">My Private Questions</button>
+
+    <h2>Public Questions</h2>
+    <input type="text" id="searchBox" placeholder="Search questions..." oninput="loadPublicQuestions()" />
+    <div id="questions"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4PLT4pUNfc5YHHXWF9ObyMSk6E4aEJ_Y",
+      authDomain: "nerf-mods-website.firebaseapp.com",
+      databaseURL: "https://nerf-mods-website-default-rtdb.firebaseio.com",
+      projectId: "nerf-mods-website",
+      storageBucket: "nerf-mods-website.appspot.com",
+      messagingSenderId: "577649234387",
+      appId: "1:577649234387:web:61e2b2f40e6508146f1f26"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const userId = localStorage.getItem("nerfUserId") || (() => {
+      const id = "user_" + Date.now();
+      localStorage.setItem("nerfUserId", id);
+      return id;
+    })();
+
+    function timeAgo(timestamp) {
+      const now = Date.now();
+      const secondsPast = Math.floor((now - timestamp) / 1000);
+      if (secondsPast < 60) return `${secondsPast}s ago`;
+      if (secondsPast < 3600) return `${Math.floor(secondsPast / 60)}m ago`;
+      if (secondsPast < 86400) return `${Math.floor(secondsPast / 3600)}h ago`;
+      return `${Math.floor(secondsPast / 86400)}d ago`;
+    }
+
+    function renderMarkdownWithEmoji(markdownText, element) {
+      element.innerHTML = marked.parse(markdownText);
+      twemoji.parse(element);
+    }
+
+    function updatePreview() {
+      const preview = document.getElementById("markdownPreview");
+      const text = document.getElementById("questionText").value;
+      renderMarkdownWithEmoji(text, preview);
+    }
+
+    document.getElementById("questionText").addEventListener("input", updatePreview);
+
+    function submitQuestion() {
+      const text = document.getElementById("questionText").value.trim();
+      const isPrivate = document.getElementById("isPrivate").checked;
+      if (!text) return;
+
+      db.ref("questions").push({
+        text,
+        isPrivate,
+        timestamp: Date.now(),
+        userId,
+        likes: 0,
+        dislikes: 0,
+        replies: [],
+        answered: false
+      }).then(() => {
+        document.getElementById("questionText").value = "";
+        updatePreview();
+        if (!isPrivate) loadPublicQuestions();
+      });
+    }
+
+    function loadPublicQuestions() {
+      db.ref("questions").once("value", (snapshot) => {
+        const search = document.getElementById("searchBox").value.toLowerCase();
+        const container = document.getElementById("questions");
+        const questions = [];
+        container.innerHTML = "";
+
+        snapshot.forEach((child) => {
+          const data = child.val();
+          const id = child.key;
+          if (!data.isPrivate && data.text.toLowerCase().includes(search)) {
+            questions.push({ id, ...data });
+          }
+        });
+
+        questions.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+
+        questions.forEach((q) => {
+          const voted = localStorage.getItem(`voted_${q.id}`);
+          const replied = localStorage.getItem(`replied_${q.id}`);
+          const div = document.createElement("div");
+          div.className = "question";
+
+          const content = document.createElement("div");
+          content.className = "markdown";
+          renderMarkdownWithEmoji(q.text, content);
+
+          div.appendChild(content);
+
+          const time = document.createElement("div");
+          time.className = "timestamp";
+          time.textContent = timeAgo(q.timestamp);
+          div.appendChild(time);
+
+          const voteDiv = document.createElement("div");
+          voteDiv.className = "like-dislike";
+          voteDiv.innerHTML = `
+            <button onclick="likeQuestion('${q.id}')" ${voted ? "disabled" : ""}>👍 ${q.likes || 0}</button>
+            <button onclick="dislikeQuestion('${q.id}')" ${voted ? "disabled" : ""}>👎 ${q.dislikes || 0}</button>
+          `;
+          div.appendChild(voteDiv);
+
+          if (q.answer) {
+            const answerDiv = document.createElement("div");
+            answerDiv.className = "answer";
+            renderMarkdownWithEmoji("Admin: " + q.answer, answerDiv);
+            div.appendChild(answerDiv);
+          }
+
+          const replyInput = document.createElement("input");
+          replyInput.placeholder = "Reply...";
+          if (!replied) {
+            replyInput.addEventListener("keydown", (e) => {
+              if (e.key === "Enter") replyTo(q.id, replyInput);
+            });
+          } else {
+            replyInput.disabled = true;
+          }
+          div.appendChild(replyInput);
+
+          (q.replies || []).forEach(reply => {
+            const r = document.createElement("div");
+            r.className = "reply";
+            renderMarkdownWithEmoji("💬 " + reply, r);
+            div.appendChild(r);
+          });
+
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function likeQuestion(id) {
+      if (localStorage.getItem(`voted_${id}`)) return;
+      localStorage.setItem(`voted_${id}`, "true");
+      db.ref(`questions/${id}/likes`).transaction((n) => (n || 0) + 1).then(loadPublicQuestions);
+    }
+
+    function dislikeQuestion(id) {
+      if (localStorage.getItem(`voted_${id}`)) return;
+      localStorage.setItem(`voted_${id}`, "true");
+      db.ref(`questions/${id}/dislikes`).transaction((n) => (n || 0) + 1).then(loadPublicQuestions);
+    }
+
+    function replyTo(id, input) {
+      const msg = input.value.trim();
+      if (!msg || localStorage.getItem(`replied_${id}`)) return;
+      db.ref(`questions/${id}/replies`).once("value").then((snap) => {
+        const replies = snap.val() || [];
+        replies.push(msg);
+        db.ref(`questions/${id}/replies`).set(replies).then(() => {
+          input.value = "";
+          localStorage.setItem(`replied_${id}`, "true");
+          loadPublicQuestions();
+        });
+      });
+    }
+
+    function loadMyPrivateQuestions() {
+      db.ref("questions").orderByChild("userId").equalTo(userId).once("value", (snapshot) => {
+        const container = document.getElementById("questions");
+        container.innerHTML = "<h2>My Private Questions</h2>";
+        snapshot.forEach((child) => {
+          const q = child.val();
+          if (q.isPrivate) {
+            const div = document.createElement("div");
+            div.className = "question";
+            const textDiv = document.createElement("div");
+            textDiv.className = "markdown";
+            renderMarkdownWithEmoji(q.text, textDiv);
+            div.appendChild(textDiv);
+
+            const time = document.createElement("div");
+            time.className = "timestamp";
+            time.textContent = timeAgo(q.timestamp);
+            div.appendChild(time);
+
+            if (q.answer) {
+              const answer = document.createElement("div");
+              answer.className = "answer";
+              renderMarkdownWithEmoji("Admin: " + q.answer, answer);
+              div.appendChild(answer);
+            } else {
+              div.innerHTML += "❌ Not answered yet";
+            }
+
+            container.appendChild(div);
+          }
+        });
+      });
+    }
+
+    loadPublicQuestions();
+  </script>
+</body>
+</html>
